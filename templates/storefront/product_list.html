@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container px-5 py-24 mx-auto">
+    <div class="flex flex-wrap -m-4">
+      {% for product in object_list %}
+        <a href="/pp/{{ product.slug }}" class="group block lg:w-1/4 md:w-1/2 p-4 w-full">
+          {% if product.thumbnail %}
+          <img
+            src="{{ product.thumbnail.url }}"
+            alt=""
+            class="object-cover w-full rounded aspect-square group-hover:shadow-xl"
+          />
+          {% else %}
+          <img
+            src="https://dummyimage.com/400x400"
+            alt=""
+            class="object-cover w-full rounded aspect-square group-hover:shadow-xl"
+          />
+          {% endif %}
+          <div class="mt-3 flex justify-between text-sm">
+            <div>
+              <h3
+                class="text-gray-900 group-hover:underline group-hover:underline-offset-4"
+              >
+                {{ product.name }}
+              </h3>
+
+              <p class="mt-1.5 max-w-[45ch] text-xs text-gray-500">
+                {{ product.description|truncatechars:100 }}
+              </p>
+            </div>
+
+            <p class="text-gray-900">${{ product.base_price }}</p>
+          </div>
+        </a>
+      {% empty %}
+        <p class="w-full text-center text-2xl">There are no products yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock content %}

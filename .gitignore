@@ -1,0 +1,8 @@
+staticfiles
+node_modules
+.env
+db.sqlite3
+**/__pycache__
+.DS_Store
+.idea
+media

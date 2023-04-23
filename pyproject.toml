@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "batcave"
+version = "0.1.0"
+description = ""
+authors = ["Dustin Kroeger <alex@tailbyte.org>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2"
+django-environ = "^0.10.0"
+pillow = "^9.4.0"
+django-resized = "^1.0.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

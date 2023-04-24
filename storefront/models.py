@@ -1,11 +1,20 @@
 from django.db import models
 from django_resized import ResizedImageField
+from django.contrib.auth.models import User
+from django.utils.text import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class Category(models.Model):
     name = models.CharField(max_length=150)
-    slug = models.SlugField(max_length=170)
+    slug = models.SlugField(unique=True, blank=True)
     priority = models.SmallIntegerField(default=0)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super(Category, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -13,13 +22,18 @@ class Category(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=200)
-    slug = models.SlugField(max_length=170)
+    slug = models.SlugField(unique=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, )
     priority = models.SmallIntegerField(default=0)
 
     base_price = models.DecimalField(default=0, max_digits=6, decimal_places=2)
     description = models.TextField(null=True, blank=True)
     thumbnail = ResizedImageField(size=[600, 600], crop=['middle', 'center'], upload_to='store/thumbnails/', blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super(Product, self).save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -33,3 +47,20 @@ class ProductCustomField(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class CartItem(models.Model):
+    item = models.ForeignKey(Product, on_delete=models.CASCADE, )
+    amount = models.PositiveSmallIntegerField(default=1)
+
+
+class Cart(models.Model):
+    owner = models.OneToOneField(User, on_delete=models.CASCADE, )
+    items = models.ManyToManyField(CartItem, blank=True, )
+    total = models.DecimalField(default=0, max_digits=8, decimal_places=2)
+
+
+@receiver(post_save, sender=User)
+def create_favorites(sender, instance, created, **kwargs):
+    if created:
+        Cart.objects.create(owner=instance)

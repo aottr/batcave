@@ -80,10 +80,10 @@
       <div class="divider"></div>
       <div class="flex">
         <span class="title-font font-medium text-2xl text-gray-900">${{ object.base_price }}</span>
-        <button
+        <a href="{% url 'add-to-cart' object.slug %}"
           class="flex ml-auto btn btn-primary">
           Add to cart
-        </button>
+        </a>
         <button
           class="btn btn-circle ml-4">
           <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5"

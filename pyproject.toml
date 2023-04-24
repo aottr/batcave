@@ -12,6 +12,7 @@ django = "^4.2"
 django-environ = "^0.10.0"
 pillow = "^9.4.0"
 django-resized = "^1.0.2"
+requests = "^2.28.2"
 
 
 [build-system]

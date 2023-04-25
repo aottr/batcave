@@ -49,14 +49,52 @@ class ProductCustomField(models.Model):
         return self.name
 
 
+class ProductColor(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, )
+    color = models.CharField(max_length=120)
+    markup = models.DecimalField(default=0, max_digits=6, decimal_places=2)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.color
+
+
+class ProductFirmness(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, )
+    firmness = models.CharField(max_length=120)
+    markup = models.DecimalField(default=0, max_digits=6, decimal_places=2)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.firmness
+
+
+class ProductSize(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, )
+    size = models.CharField(max_length=120)
+    markup = models.DecimalField(default=0, max_digits=6, decimal_places=2)
+    active = models.BooleanField(default=True)
+
+    def __str__(self):
+        return self.size
+
+
+class ProductConfiguration(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, )
+    color = models.ForeignKey(ProductColor, null=True, blank=True, on_delete=models.CASCADE, )
+    size = models.ForeignKey(ProductSize, null=True, blank=True, on_delete=models.CASCADE, )
+    firmness = models.ForeignKey(ProductFirmness, null=True, blank=True, on_delete=models.CASCADE, )
+    note = models.TextField(blank=True)
+
+
 class CartItem(models.Model):
-    item = models.ForeignKey(Product, on_delete=models.CASCADE, )
+    item = models.ForeignKey(ProductConfiguration, on_delete=models.CASCADE, )
     amount = models.PositiveSmallIntegerField(default=1)
 
 
 class Cart(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE, )
-    items = models.ManyToManyField(CartItem, blank=True, )
+    items = models.ManyToManyField(CartItem, null=True, blank=True, )
     total = models.DecimalField(default=0, max_digits=8, decimal_places=2)
 
 

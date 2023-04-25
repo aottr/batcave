@@ -30,6 +30,10 @@ class Product(models.Model):
     description = models.TextField(null=True, blank=True)
     thumbnail = ResizedImageField(size=[600, 600], crop=['middle', 'center'], upload_to='store/thumbnails/', blank=True)
 
+    active = models.BooleanField(default=True)
+    stock = models.SmallIntegerField(default=0)
+    per_user_limit = models.SmallIntegerField(default=0)
+
     def save(self, *args, **kwargs):
         if not self.slug:
             self.slug = slugify(self.name)
@@ -56,7 +60,7 @@ class ProductColor(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.color
+        return self.color if self.markup == 0 else f"{self.color} (+${self.markup})"
 
 
 class ProductFirmness(models.Model):
@@ -66,7 +70,7 @@ class ProductFirmness(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.firmness
+        return self.firmness if self.markup == 0 else f"{self.firmness} (+${self.markup})"
 
 
 class ProductSize(models.Model):
@@ -76,7 +80,7 @@ class ProductSize(models.Model):
     active = models.BooleanField(default=True)
 
     def __str__(self):
-        return self.size
+        return self.size if self.markup == 0 else f"{self.size} (+${self.markup})"
 
 
 class ProductConfiguration(models.Model):
@@ -86,16 +90,38 @@ class ProductConfiguration(models.Model):
     firmness = models.ForeignKey(ProductFirmness, null=True, blank=True, on_delete=models.CASCADE, )
     note = models.TextField(blank=True)
 
+    def calculate_total(self):
+        total = self.product.base_price
+        if self.size:
+            total += self.size.markup
+        if self.color:
+            total += self.color.markup
+        if self.firmness:
+            total += self.firmness.markup
 
-class CartItem(models.Model):
-    item = models.ForeignKey(ProductConfiguration, on_delete=models.CASCADE, )
-    amount = models.PositiveSmallIntegerField(default=1)
+        return total
 
 
 class Cart(models.Model):
     owner = models.OneToOneField(User, on_delete=models.CASCADE, )
-    items = models.ManyToManyField(CartItem, null=True, blank=True, )
-    total = models.DecimalField(default=0, max_digits=8, decimal_places=2)
+
+    def get_items(self):
+        return CartItem.objects.filter(cart=self)
+
+    def get_total(self):
+        items = self.get_items()
+        total = 0
+        for item in items.iterator():
+            total += item.item.calculate_total() * item.amount
+        return total
+
+
+class CartItem(models.Model):
+    cart = models.ForeignKey(Cart, on_delete=models.CASCADE, )
+    item = models.ForeignKey(ProductConfiguration, on_delete=models.CASCADE, )
+    amount = models.PositiveSmallIntegerField(default=1)
+    added_at = models.DateTimeField(auto_now_add=True)
+    # TODO add timer
 
 
 @receiver(post_save, sender=User)

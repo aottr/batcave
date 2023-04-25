@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="overflow-x-auto">
+  <table class="table w-full">
+    <!-- head -->
+    <thead>
+      <tr>
+        <th></th>
+        <th>Name</th>
+        <th>Job</th>
+        <th>Favorite Color</th>
+      </tr>
+    </thead>
+    <tbody>
+{% for cartItem in object_list %}
+  <tr>
+        <th>{{ cartItem.amount }}</th>
+        <td>{{ cartItem.item.name }}</td>
+        <td>Quality Control Specialist</td>
+        <td>Blue</td>
+      </tr>
+  <p>{{ cartItem.item.name }}</p>
+{% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

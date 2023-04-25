@@ -22,6 +22,38 @@ class CategoryView(ListView):
     paginate_by = 20
 
 
+def product_detail(request, slug, **kwargs):
+    product = Product.objects.get(slug=slug)
+
+    size_choices = extract_choices(ProductSize.objects.filter(product=product))
+    color_choices = extract_choices(ProductColor.objects.filter(product=product))
+    firmness_choices = extract_choices(ProductFirmness.objects.filter(product=product))
+
+    if request.method == 'POST':
+        form = ProductConfigurationForm(request.POST, user=request.user, product=product, size_choices=size_choices,
+                                        color_choices=color_choices,
+                                        firmness_choices=firmness_choices)
+        if form.is_valid():
+
+            cart = request.user.cart
+            config = ProductConfiguration.objects.create(
+                product=product,
+                color=form.cleaned_data.get('color'),
+                firmness=form.cleaned_data.get('firmness'),
+                size=form.cleaned_data.get('size'),
+                note=form.cleaned_data.get('note')
+            )
+            CartItem.objects.create(cart=cart, item=config, amount=form.cleaned_data.get('amount'))
+            product.stock -= form.cleaned_data.get('amount')
+            product.save()
+
+    else:
+        form = ProductConfigurationForm(user=request.user, product=product, size_choices=size_choices,
+                                        color_choices=color_choices,
+                                        firmness_choices=firmness_choices)
+    return render(request, 'storefront/product_detail.html', {"form": form, 'object': product})
+
+
 class ProductView(DetailView):
     model = Product
 
@@ -36,17 +68,13 @@ class ProductView(DetailView):
 
     def post(self, request, slug, **kwargs):
         form = ProductConfigurationForm(request.POST)
+        product = Product.objects.get(slug=slug)
         # check whether it's valid:
         if form.is_valid():
             print(form.cleaned_data.get('size'))
             return redirect('cart')
 
-            # if a GET (or any other method) we'll create a blank form
-
-        else:
-            form = ProductConfigurationForm()
-
-        return render(request, 'storefront/product_detail.html', {"form": form})
+        return render(request, 'storefront/product_detail.html', {"form": form, 'object': product})
 
 
 class CartView(ListView):
@@ -55,32 +83,11 @@ class CartView(ListView):
 
 
 def empty_cart(request):
-    request.user.cart.items.clear()
-    request.user.cart.save()
+
+    items = CartItem.objects.filter(cart=request.user.cart)
+    for item in items.iterator():
+        item.item.product.stock += item.amount
+        item.item.product.save()
+        item.delete()
+
     return redirect('cart')
-
-
-def add_to_cart(request, slug):
-    # TODO Error handling
-
-    cart = request.user.cart
-
-    if request.method != 'POST':
-        return redirect('product-detail', slug=slug)
-
-    product = Product.objects.get(slug=slug)
-
-    config = ProductConfiguration.objects.create(product=product)
-    cart.items.add(CartItem.objects.create(item=config))
-    cart.total += config.product.base_price
-
-    if config.size:
-        cart.total += config.size.markup
-    if config.color:
-        cart.total += config.color.markup
-    if config.firmness:
-        cart.total += config.firmness.markup
-
-    cart.save()
-
-    return redirect('product-detail', slug=slug)

@@ -1,12 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, DetailView, ListView
-from django.views import View
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic.edit import FormMixin, ModelFormMixin
-from django.urls import reverse
-from urllib.parse import urlencode
 from storefront.models import Product, CartItem, ProductConfiguration, ProductSize, ProductColor, ProductFirmness
-from storefront.forms import ProductConfiguratorForm, ProductConfigurationForm
+from storefront.forms import ProductConfigurationForm
+from storefront.utils import calculate_stock
 
 
 def extract_choices(queryset):
@@ -36,16 +32,28 @@ def product_detail(request, slug, **kwargs):
         if form.is_valid():
 
             cart = request.user.cart
-            config = ProductConfiguration.objects.create(
+            config = ProductConfiguration(
                 product=product,
                 color=form.cleaned_data.get('color'),
                 firmness=form.cleaned_data.get('firmness'),
                 size=form.cleaned_data.get('size'),
                 note=form.cleaned_data.get('note')
             )
-            CartItem.objects.create(cart=cart, item=config, amount=form.cleaned_data.get('amount'))
-            product.stock -= form.cleaned_data.get('amount')
-            product.save()
+            new_cart_item = CartItem(cart=cart, item=config, amount=form.cleaned_data.get('amount'))
+
+            other_cart_items = CartItem.objects.filter(cart=cart)
+            create = True
+            for cart_item in other_cart_items.iterator():
+                if cart_item.item.compare_with(config):
+                    create = False
+                    cart_item.amount += new_cart_item.amount
+                    cart_item.save()
+
+            if create:
+                config.save()
+                new_cart_item.save()
+
+            calculate_stock(new_cart_item)
 
     else:
         form = ProductConfigurationForm(user=request.user, product=product, size_choices=size_choices,
@@ -86,8 +94,7 @@ def empty_cart(request):
 
     items = CartItem.objects.filter(cart=request.user.cart)
     for item in items.iterator():
-        item.item.product.stock += item.amount
-        item.item.product.save()
+        calculate_stock(item, False)
         item.delete()
 
     return redirect('cart')

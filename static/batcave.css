@@ -1612,6 +1612,27 @@ html {
   outline: 2px solid hsl(var(--su));
 }
 
+.btn-error {
+  --tw-border-opacity: 1;
+  border-color: hsl(var(--er) / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--er) / var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: hsl(var(--erc, var(--nc)) / var(--tw-text-opacity));
+}
+
+.btn-error:hover,
+    .btn-error.btn-active {
+  --tw-border-opacity: 1;
+  border-color: hsl(var(--er) / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--er) / var(--tw-bg-opacity));
+}
+
+.btn-error:focus-visible {
+  outline: 2px solid hsl(var(--er));
+}
+
 .btn.glass:hover,
     .btn.glass.btn-active {
   --glass-opacity: 25%;
@@ -1683,6 +1704,21 @@ html {
   background-color: hsl(var(--su) / var(--tw-bg-opacity));
   --tw-text-opacity: 1;
   color: hsl(var(--suc, var(--nc)) / var(--tw-text-opacity));
+}
+
+.btn-outline.btn-error {
+  --tw-text-opacity: 1;
+  color: hsl(var(--er) / var(--tw-text-opacity));
+}
+
+.btn-outline.btn-error:hover,
+      .btn-outline.btn-error.btn-active {
+  --tw-border-opacity: 1;
+  border-color: hsl(var(--er) / var(--tw-border-opacity));
+  --tw-bg-opacity: 1;
+  background-color: hsl(var(--er) / var(--tw-bg-opacity));
+  --tw-text-opacity: 1;
+  color: hsl(var(--erc, var(--nc)) / var(--tw-text-opacity));
 }
 
 .btn-disabled,
@@ -1817,6 +1853,10 @@ html {
 
 .drawer-toggle:focus-visible ~ .drawer-content .drawer-button.btn-success {
   outline: 2px solid hsl(var(--su));
+}
+
+.drawer-toggle:focus-visible ~ .drawer-content .drawer-button.btn-error {
+  outline: 2px solid hsl(var(--er));
 }
 
 .drawer-toggle:focus-visible ~ .drawer-content .drawer-button.btn-ghost {

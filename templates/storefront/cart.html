@@ -2,27 +2,33 @@
 
 {% block content %}
   <div class="overflow-x-auto">
-  <table class="table w-full">
-    <!-- head -->
-    <thead>
+    <table class="table w-full">
+      <!-- head -->
+      <thead>
       <tr>
-        <th></th>
+        <th>Quantity</th>
         <th>Name</th>
-        <th>Job</th>
-        <th>Favorite Color</th>
+        <th>Options</th>
+        <th>Price</th>
       </tr>
-    </thead>
-    <tbody>
-{% for cartItem in object_list %}
-  <tr>
-        <th>{{ cartItem.amount }}</th>
-        <td>{{ cartItem.item.name }}</td>
-        <td>Quality Control Specialist</td>
-        <td>Blue</td>
-      </tr>
-  <p>{{ cartItem.item.name }}</p>
-{% endfor %}
-    </tbody>
-  </table>
-</div>
+      </thead>
+      <tbody>
+      {% for cartItem in object_list %}
+        <tr>
+          <th>{{ cartItem.amount }}</th>
+          <td>{{ cartItem.item.product.name }}</td>
+          <td>
+            {% if cartItem.item.color %}{{ cartItem.item.color }}, {% endif %}
+            {% if cartItem.item.size %}{{ cartItem.item.size }}, {% endif %}
+            {% if cartItem.item.firmness %}{{ cartItem.item.firmness }},{% endif %}
+            {{ cartItem.item.note }}
+          </td>
+          <td>${{ cartItem.calculate_total|floatformat:2 }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+
+    <a href="{% url 'empty-cart' %}" class="btn btn-error mt-4">Empty Cart</a>
+  </div>
 {% endblock %}

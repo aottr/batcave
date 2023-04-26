@@ -1,10 +1,10 @@
 from django import forms
 from django.core.exceptions import ValidationError
 from storefront.models import ProductConfiguration
+from storefront.utils import check_stock
 
 
 class ProductConfigurationForm(forms.ModelForm):
-
     amount = forms.IntegerField(min_value=1, step_size=1, initial=1)
     amount.widget.attrs['class'] = 'input input-bordered max-w-xs'
 
@@ -20,11 +20,9 @@ class ProductConfigurationForm(forms.ModelForm):
     def clean_amount(self):
         amount = self.cleaned_data["amount"]
 
-        if amount > self.product.stock:
+        if not check_stock(self.product, self.cleaned_data.get('size'), self.cleaned_data.get('color'), amount):
             raise ValidationError("We don't have enough in stock.")
 
-        # Always return a value to use as the new cleaned data, even if
-        # this method didn't change it.
         return amount
 
     def __init__(self, *args, **kwargs):
@@ -60,24 +58,3 @@ class ProductConfigurationForm(forms.ModelForm):
     class Meta:
         model = ProductConfiguration
         fields = ['size', 'color', 'firmness', 'note']
-
-
-class ProductConfiguratorForm(forms.Form):
-    def __init__(self, size_choices=None, color_choices=None, firmness_choices=None, *args, **kwargs):
-        super(ProductConfiguratorForm, self).__init__(*args, **kwargs)
-        if size_choices:
-            self.fields['size'].choices = size_choices
-            self.fields['size'].required = True
-
-        if color_choices:
-            self.fields['color'].choices = color_choices
-            self.fields['color'].required = True
-
-        if firmness_choices:
-            self.fields['firmness'].choices = firmness_choices
-            self.fields['firmness'].required = True
-
-    size = forms.ChoiceField(choices=(), required=False)
-    color = forms.ChoiceField(choices=(), required=False)
-    firmness = forms.ChoiceField(choices=(), required=False)
-    note = forms.CharField(widget=forms.Textarea, required=False)

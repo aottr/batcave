@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 from django.views.generic import TemplateView, DetailView, ListView
-from storefront.models import Product, CartItem, ProductConfiguration, ProductSize, ProductColor, ProductFirmness
+from storefront.models import Product, CartItem, ProductConfiguration, ProductSize, ProductColor, ProductFirmness, ProductImage
 from storefront.forms import ProductConfigurationForm
 from storefront.utils import calculate_stock
 
@@ -20,12 +21,17 @@ class CategoryView(ListView):
 
 def product_detail(request, slug, **kwargs):
     product = Product.objects.get(slug=slug)
+    product_images = ProductImage.objects.filter(product=product)
 
     size_choices = extract_choices(ProductSize.objects.filter(product=product))
     color_choices = extract_choices(ProductColor.objects.filter(product=product))
     firmness_choices = extract_choices(ProductFirmness.objects.filter(product=product))
 
     if request.method == 'POST':
+        print(request.user.is_authenticated)
+        if not request.user.is_authenticated:
+            return redirect('login')
+
         form = ProductConfigurationForm(request.POST, user=request.user, product=product, size_choices=size_choices,
                                         color_choices=color_choices,
                                         firmness_choices=firmness_choices)
@@ -59,7 +65,7 @@ def product_detail(request, slug, **kwargs):
         form = ProductConfigurationForm(user=request.user, product=product, size_choices=size_choices,
                                         color_choices=color_choices,
                                         firmness_choices=firmness_choices)
-    return render(request, 'storefront/product_detail.html', {"form": form, 'object': product})
+    return render(request, 'storefront/product_detail.html', {"form": form, 'object': product, 'images': product_images})
 
 
 class ProductView(DetailView):
@@ -74,6 +80,7 @@ class ProductView(DetailView):
                                                    firmness_choices=firmness_choices)
         return context
 
+    @login_required
     def post(self, request, slug, **kwargs):
         form = ProductConfigurationForm(request.POST)
         product = Product.objects.get(slug=slug)

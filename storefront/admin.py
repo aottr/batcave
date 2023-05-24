@@ -1,5 +1,5 @@
 from django.contrib import admin
-from storefront.models import Product, Category, ProductSize, ProductColor, ProductConfiguration, ProductFirmness, Cart
+from storefront.models import Product, Category, ProductSize, ProductColor, ProductConfiguration, ProductFirmness, ProductImage, Cart
 
 
 admin.site.register(Category)
@@ -25,6 +25,12 @@ class ProductFirmnessInline(admin.TabularInline):
     classes = ('collapse',)
 
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 1
+    classes = ('collapse',)
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    inlines = [ProductSizeInline, ProductColorInline, ProductFirmnessInline]
+    inlines = [ProductSizeInline, ProductColorInline, ProductFirmnessInline, ProductImageInline]

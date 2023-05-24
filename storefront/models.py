@@ -157,6 +157,16 @@ class CartItem(models.Model):
     # TODO add timer
 
 
+class ProductImage(models.Model):
+    name = models.CharField(max_length=128)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, )
+    filepath = models.ImageField(upload_to='store/images/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+
 @receiver(post_save, sender=User)
 def create_cart_for_user(sender, instance, created, **kwargs):
     if created:

@@ -18,36 +18,21 @@
   <div class="relative mx-auto max-w-screen-xl px-4 py-8">
     <div class="grid grid-cols-1 items-start gap-8 md:grid-cols-2">
       <div class="grid grid-cols-2 gap-4 md:grid-cols-1">
+        {% if object.thumbnail %}
         <img
           alt="Les Paul"
-          src="https://images.unsplash.com/photo-1456948927036-ad533e53865c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
+          src="{{ object.thumbnail.url }}"
           class="aspect-square w-full rounded-xl object-cover"
         />
-
+        {% endif %}
         <div class="grid grid-cols-2 gap-4 lg:mt-4">
+          {% for image in images %}
           <img
             alt="Les Paul"
-            src="https://images.unsplash.com/photo-1456948927036-ad533e53865c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
+            src="{{ image.filepath.url }}"
             class="aspect-square w-full rounded-xl object-cover"
           />
-
-          <img
-            alt="Les Paul"
-            src="https://images.unsplash.com/photo-1456948927036-ad533e53865c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-            class="aspect-square w-full rounded-xl object-cover"
-          />
-
-          <img
-            alt="Les Paul"
-            src="https://images.unsplash.com/photo-1456948927036-ad533e53865c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-            class="aspect-square w-full rounded-xl object-cover"
-          />
-
-          <img
-            alt="Les Paul"
-            src="https://images.unsplash.com/photo-1456948927036-ad533e53865c?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"
-            class="aspect-square w-full rounded-xl object-cover"
-          />
+          {% endfor %}
         </div>
       </div>
 
@@ -74,15 +59,15 @@
           <p class="text-lg font-bold">${{ object.base_price }}+</p>
         </div>
 
-        <div class="mt-4">
+        <!--<div class="mt-4">
           <div class="prose max-w-none">
             <p>
-              {{ object.description }}
+
             </p>
           </div>
 
           <a href="#description" class="mt-2 text-sm font-medium underline">Read More</a>
-        </div>
+        </div>-->
 
         <form class="mt-8" action="" method="post">
           {% csrf_token %}
@@ -118,14 +103,14 @@
                     class="flex ml-auto btn btn-primary">
               Add to cart
             </button>
-            <button
+            <!--<button
               class="btn btn-circle ml-4">
               <svg fill="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="w-5 h-5"
                    viewBox="0 0 24 24">
                 <path
                   d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"></path>
               </svg>
-            </button>
+            </button>-->
           </div>
         </form>
       </div>
@@ -133,14 +118,9 @@
 
     <div>
       <h1 class="text-2xl mt-8" id="description">Description</h1>
-      {{ object.description }}
+      <p class="whitespace-pre-line">
+        {{ object.description }}
+      </p>
     </div>
-    {% if object.thumbnail %}
-      <img alt="ecommerce" class="lg:w-1/2 w-full lg:h-auto h-64 object-cover object-center rounded"
-           src="{{ object.thumbnail.url }}">
-    {% else %}
-      <img alt="ecommerce" class="lg:w-1/2 w-full lg:h-auto h-64 object-cover object-center rounded"
-           src="https://dummyimage.com/400x400">
-    {% endif %}
   </div>
 {% endblock content %}
